@@ -5,7 +5,6 @@ import { users, questions, scores } from '@/db/schema';
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { eq, desc } from 'drizzle-orm';
 import { GameState } from '@/types/quiz';
-import { headers } from 'next/headers';
 
 export async function saveUser(userData: {
   id: number;
