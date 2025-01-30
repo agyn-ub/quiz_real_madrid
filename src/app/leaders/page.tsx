@@ -29,6 +29,7 @@ export default function LeadersPage() {
       return;
     }
 
+    // Add timestamp to prevent caching
     getTopScores(20)
       .then(fetchedLeaders => {
         setLeaders(fetchedLeaders);
@@ -40,6 +41,25 @@ export default function LeadersPage() {
       });
   }, [router]);
 
+  // Add a refresh function
+  const refreshLeaders = () => {
+    setLoading(true);
+    getTopScores(20)
+      .then(fetchedLeaders => {
+        setLeaders(fetchedLeaders);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error refreshing leaders:', error);
+      });
+  };
+
+  useEffect(() => {
+    // Set up an interval to refresh the data every 30 seconds
+    const interval = setInterval(refreshLeaders, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   if (loading) {
     return <div className="text-center p-4">Loading...</div>;
   }
@@ -47,7 +67,7 @@ export default function LeadersPage() {
   return (
     <main className="container mx-auto p-4 max-w-2xl">
       <h1 className="text-3xl font-bold mb-8">Таблица лидеров</h1>
-      <LeadersList leaders={leaders} />
+      <LeadersList leaders={leaders} onRefresh={refreshLeaders} />
     </main>
   );
 } 

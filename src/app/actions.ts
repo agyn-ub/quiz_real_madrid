@@ -5,6 +5,7 @@ import { users, questions, scores } from '@/db/schema';
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { eq, desc } from 'drizzle-orm';
 import { GameState } from '@/types/quiz';
+import { headers } from 'next/headers';
 
 export async function saveUser(userData: {
   id: number;
@@ -90,6 +91,7 @@ export async function getUserResults(userId: number) {
 }
 
 export async function getTopScores(limit: number = 20) {
+  // Opt out of caching at the data fetch level
   noStore();
   
   const results = await db
@@ -108,6 +110,11 @@ export async function getTopScores(limit: number = 20) {
     .innerJoin(users, eq(scores.userId, users.id))
     .orderBy(desc(scores.score))
     .limit(limit);
+
+  // Add cache control headers
+  headers().set('Cache-Control', 'no-store, must-revalidate');
+  headers().set('Pragma', 'no-cache');
+  headers().set('Expires', '0');
 
   return results.map(leader => ({
     ...leader,

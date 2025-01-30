@@ -17,9 +17,10 @@ type Leader = {
 
 type Props = {
   leaders: Leader[];
+  onRefresh: () => void;
 };
 
-export function LeadersList({ leaders }: Props) {
+export function LeadersList({ leaders, onRefresh }: Props) {
   const router = useRouter();
 
   const handleMainMenu = () => {
@@ -28,12 +29,20 @@ export function LeadersList({ leaders }: Props) {
 
   return (
     <div className="space-y-4">
-      <button
-        onClick={handleMainMenu}
-        className="w-full mb-4 px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
-      >
-        На главную
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={handleMainMenu}
+          className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
+        >
+          На главную
+        </button>
+        <button
+          onClick={onRefresh}
+          className="px-6 py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors"
+        >
+          Обновить
+        </button>
+      </div>
 
       {leaders.map((leader, index) => (
         <div key={index} className="bg-white rounded-lg shadow p-4 flex items-center">
