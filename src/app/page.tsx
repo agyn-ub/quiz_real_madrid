@@ -1,6 +1,3 @@
-import { getRandomQuestions } from './actions';
-import { Quiz } from './components/Quiz';
-import type { Question } from '@/types/quiz';
 import TelegramAuth from '@/components/TelegramAuth';
 
 export default function Home() {

@@ -5,27 +5,10 @@ import Script from 'next/script';
 import { saveUser } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 
-type TelegramUser = {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  language_code?: string;
-  photo_url?: string;
-};
-
 export default function TelegramAuth() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isTelegramClient, setIsTelegramClient] = useState(false);
-  const [user, setUser] = useState<TelegramUser | null>(() => {
-    // Try to get user from sessionStorage on initial load
-    if (typeof window !== 'undefined') {
-      const savedUser = sessionStorage.getItem('telegramUser');
-      return savedUser ? JSON.parse(savedUser) : null;
-    }
-    return null;
-  });
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
@@ -39,7 +22,6 @@ export default function TelegramAuth() {
       if (!sessionStorage.getItem('telegramUser')) {
         const userData = telegram.WebApp.initDataUnsafe?.user;
         if (userData) {
-          setUser(userData);
           sessionStorage.setItem('telegramUser', JSON.stringify(userData));
           saveUser(userData);
           router.push('/menu');

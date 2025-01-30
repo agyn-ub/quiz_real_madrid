@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { TelegramUser } from '@/types/telegram';
+import Image from 'next/image';
 
 export default function GameMenu() {
   const router = useRouter();
@@ -35,9 +36,11 @@ export default function GameMenu() {
     <div className="flex flex-col items-center gap-6">
       <div className="flex flex-col items-center gap-4">
         {user.photo_url && (
-          <img
+          <Image
             src={user.photo_url}
-            alt="Profile"
+            alt={user.first_name}
+            width={96}
+            height={96}
             className="w-24 h-24 rounded-full"
           />
         )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 type Leader = {
   score: number;
@@ -25,28 +26,6 @@ export function LeadersList({ leaders }: Props) {
     router.push('/menu');
   };
 
-  const getPositionStyle = (position: number) => {
-    switch (position) {
-      case 1:
-        return "bg-yellow-500 text-white";
-      case 2:
-        return "bg-gray-400 text-white";
-      case 3:
-        return "bg-amber-600 text-white";
-      default:
-        return "bg-blue-100 text-blue-600";
-    }
-  };
-
-  const formatDate = (date: Date | null) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
-  };
-
   return (
     <div className="space-y-4">
       <button
@@ -57,23 +36,24 @@ export function LeadersList({ leaders }: Props) {
       </button>
 
       {leaders.map((leader, index) => (
-        <div key={index} className="bg-white rounded-lg shadow p-4 flex items-center gap-4">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${getPositionStyle(index + 1)}`}>
-            {index + 1}
-          </div>
-          
-          <div className="flex-shrink-0">
+        <div key={index} className="bg-white rounded-lg shadow p-4 flex items-center">
+          <div className="flex-shrink-0 w-12 h-12 mr-4">
             {leader.photoUrl ? (
-              <img src={leader.photoUrl} alt="" className="w-12 h-12 rounded-full" />
+              <Image
+                src={leader.photoUrl}
+                alt={leader.firstName}
+                width={48}
+                height={48}
+                className="rounded-full"
+              />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-blue-600 text-xl">
-                  {leader.firstName.charAt(0)}
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-xl font-bold text-blue-500">
+                  {leader.firstName[0]}
                 </span>
               </div>
             )}
           </div>
-          
           <div className="flex-grow">
             <div className="font-medium text-black">
               {leader.firstName} {leader.lastName}
@@ -83,9 +63,12 @@ export function LeadersList({ leaders }: Props) {
                 </span>
               )}
             </div>
-            <div className="text-sm text-black">
-              {leader.score} очков • {leader.correctAnswers}/{leader.totalQuestions} правильных • {leader.timeSpent}с
+            <div className="text-sm text-gray-500">
+              {leader.correctAnswers}/{leader.totalQuestions} правильных • {leader.timeSpent}с
             </div>
+          </div>
+          <div className="flex-shrink-0 text-xl font-bold text-blue-500">
+            {leader.score}
           </div>
         </div>
       ))}

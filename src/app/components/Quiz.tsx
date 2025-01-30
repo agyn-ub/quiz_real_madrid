@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Question, GameState } from '@/types/quiz';
 import { saveGameResults, getUserIdByTelegramId } from '../actions';
 import { useRouter } from 'next/navigation';
@@ -8,6 +8,13 @@ import { useRouter } from 'next/navigation';
 type Props = {
   initialQuestions: Question[];
   telegramId: number;
+};
+
+type GameResults = {
+  score: number;
+  correctAnswers: number;
+  totalQuestions: number;
+  timeSpent: number;
 };
 
 export function Quiz({ initialQuestions, telegramId }: Props) {
@@ -22,7 +29,7 @@ export function Quiz({ initialQuestions, telegramId }: Props) {
     endTime: undefined
   });
   const [isFinished, setIsFinished] = useState(false);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<GameResults | null>(null);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
   const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
@@ -83,37 +90,23 @@ export function Quiz({ initialQuestions, telegramId }: Props) {
     router.push('/menu');
   };
 
-  const handlePlayAgain = async () => {
-    const response = await fetch('/game', {
-      method: 'GET',
-      headers: {
-        'Cache-Control': 'no-cache'
-      }
-    });
-    
-    if (response.ok) {
-      router.refresh();
-      router.push('/game');
-    }
-  };
-
   if (isFinished) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-8">
         <h2 className="text-3xl font-bold text-center mb-6">Игра завершена!</h2>
         <div className="space-y-4">
           <div className="text-center">
-            <div className="text-6xl font-bold text-blue-500 mb-2">{results.score}</div>
+            <div className="text-6xl font-bold text-blue-500 mb-2">{results?.score}</div>
             <div className="text-black">Очков набрано</div>
           </div>
           
           <div className="grid grid-cols-2 gap-4 mt-8">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-black">{results.correctAnswers}/{results.totalQuestions}</div>
+              <div className="text-2xl font-bold text-black">{results?.correctAnswers}/{results?.totalQuestions}</div>
               <div className="text-black">Правильных ответов</div>
             </div>
             <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-black">{results.timeSpent}с</div>
+              <div className="text-2xl font-bold text-black">{results?.timeSpent}с</div>
               <div className="text-black">Затраченное время</div>
             </div>
           </div>
