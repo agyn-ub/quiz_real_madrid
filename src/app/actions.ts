@@ -2,7 +2,7 @@
 
 import { db } from '@/db/config';
 import { users, questions, scores } from '@/db/schema';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { eq, desc } from 'drizzle-orm';
 import { GameState } from '@/types/quiz';
 
@@ -90,6 +90,8 @@ export async function getUserResults(userId: number) {
 }
 
 export async function getTopScores(limit: number = 20) {
+  noStore();
+  
   const results = await db
     .select({
       score: scores.score,
@@ -107,13 +109,12 @@ export async function getTopScores(limit: number = 20) {
     .orderBy(desc(scores.score))
     .limit(limit);
 
-  // Transform the results to ensure firstName is never null
   return results.map(leader => ({
     ...leader,
-    firstName: leader.firstName || 'Anonymous', // Provide a default value
-    lastName: leader.lastName,
-    username: leader.username,
-    photoUrl: leader.photoUrl,
+    firstName: leader.firstName || 'Anonymous',
+    lastName: leader.lastName || '',
+    username: leader.username || '',
+    photoUrl: leader.photoUrl || null,
   }));
 }
 

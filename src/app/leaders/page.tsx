@@ -1,7 +1,11 @@
 import { getTopScores } from '../actions';
 import { LeadersList } from '@/app/components/LeadersList';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export default async function LeadersPage() {
+  // Opt out of caching for this page
+  noStore();
+  
   const leaders = await getTopScores(20);
   
   return (
