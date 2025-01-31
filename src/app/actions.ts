@@ -5,6 +5,7 @@ import { users, questions, scores } from '@/db/schema';
 import { revalidatePath, unstable_noStore as noStore } from 'next/cache';
 import { eq, desc } from 'drizzle-orm';
 import { GameState } from '@/types/quiz';
+import { withRetry } from '@/db/utils';
 
 export async function saveUser(userData: {
   id: number;
@@ -52,6 +53,7 @@ export async function saveUser(userData: {
 }
 
 export async function getRandomQuestions(count: number = 10) {
+  noStore();
   const allQuestions = await db.select().from(questions);
   const shuffled = allQuestions.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
@@ -79,55 +81,78 @@ export async function saveGameResults(userId: number, gameState: GameState) {
 }
 
 export async function getUserResults(userId: number) {
-  const userScores = await db
-    .select()
-    .from(scores)
-    .where(eq(scores.userId, userId))
-    .orderBy(desc(scores.createdAt))
-    .limit(10);
-
-  return userScores;
+  noStore();
+  
+  try {
+    return await withRetry(() =>
+      db
+        .select()
+        .from(scores)
+        .where(eq(scores.userId, userId))
+        .orderBy(desc(scores.createdAt))
+        .limit(10)
+    );
+  } catch (error) {
+    console.error('Error getting user results:', error);
+    return [];
+  }
 }
 
 export async function getTopScores(limit: number = 20) {
   noStore();
   
-  const results = await db
-    .select({
-      score: scores.score,
-      correctAnswers: scores.correctAnswers,
-      totalQuestions: scores.totalQuestions,
-      timeSpent: scores.timeSpent,
-      createdAt: scores.createdAt,
-      firstName: users.firstName,
-      lastName: users.lastName,
-      username: users.username,
-      photoUrl: users.photoUrl,
-    })
-    .from(scores)
-    .innerJoin(users, eq(scores.userId, users.id))
-    .orderBy(desc(scores.score))
-    .limit(limit);
+  try {
+    const results = await withRetry(() =>
+      db
+        .select({
+          score: scores.score,
+          correctAnswers: scores.correctAnswers,
+          totalQuestions: scores.totalQuestions,
+          timeSpent: scores.timeSpent,
+          createdAt: scores.createdAt,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          username: users.username,
+          photoUrl: users.photoUrl,
+        })
+        .from(scores)
+        .innerJoin(users, eq(scores.userId, users.id))
+        .orderBy(desc(scores.score))
+        .limit(limit)
+    );
 
-  return results.map(leader => ({
-    ...leader,
-    firstName: leader.firstName || 'Anonymous',
-    lastName: leader.lastName || '',
-    username: leader.username || '',
-    photoUrl: leader.photoUrl || null,
-  }));
+    return results.map(leader => ({
+      ...leader,
+      firstName: leader.firstName || 'Anonymous',
+      lastName: leader.lastName || '',
+      username: leader.username || '',
+      photoUrl: leader.photoUrl || null,
+    }));
+  } catch (error) {
+    console.error('Error getting top scores:', error);
+    return [];
+  }
 }
 
 export async function getUserIdByTelegramId(telegramId: number) {
-  const user = await db
-    .select({ id: users.id })
-    .from(users)
-    .where(eq(users.telegramId, telegramId))
-    .limit(1);
+  noStore();
+  
+  try {
+    const user = await withRetry(() => 
+      db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.telegramId, telegramId))
+        .limit(1)
+    );
 
-  if (!user.length) {
-    throw new Error('User not found');
+    if (!user.length) {
+      throw new Error('User not found');
+    }
+
+    return user[0].id;
+  } catch (error) {
+    console.error('Error getting user ID:', error);
+    throw new Error('Failed to get user ID. Please try again.');
   }
-
-  return user[0].id;
 } 
