@@ -18,13 +18,11 @@ export default function GameMenu() {
     setUser(JSON.parse(savedUser));
   }, [router]);
 
-  const handleOptionClick = (option: 'game' | 'results' | 'leaders') => {
+  const handleOptionClick = (option: 'game' | 'results') => {
     if (option === 'game') {
       router.push('/game');
     } else if (option === 'results') {
       router.push('/results');
-    } else if (option === 'leaders') {
-      router.push('/leaders');
     }
   };
 
@@ -56,7 +54,7 @@ export default function GameMenu() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 w-full max-w-md">
+      <div className="grid grid-cols-2 gap-4 w-full max-w-md">
         <button
           onClick={() => handleOptionClick('game')}
           className="flex flex-col items-center p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
@@ -69,16 +67,6 @@ export default function GameMenu() {
         </button>
 
         <button
-          onClick={() => handleOptionClick('leaders')}
-          className="flex flex-col items-center p-4 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
-        >
-          <svg className="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <span className="text-sm font-medium">Лидеры</span>
-        </button>
-
-        <button
           onClick={() => handleOptionClick('results')}
           className="flex flex-col items-center p-4 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
         >
@@ -87,7 +75,6 @@ export default function GameMenu() {
           </svg>
           <span className="text-sm font-medium">Результаты</span>
         </button>
-
       </div>
     </div>
   );

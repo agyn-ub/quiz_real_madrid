@@ -98,42 +98,6 @@ export async function getUserResults(userId: number) {
   }
 }
 
-export async function getTopScores(limit: number = 20) {
-  noStore();
-  
-  try {
-    const results = await withRetry(() =>
-      db
-        .select({
-          score: scores.score,
-          correctAnswers: scores.correctAnswers,
-          totalQuestions: scores.totalQuestions,
-          timeSpent: scores.timeSpent,
-          createdAt: scores.createdAt,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          username: users.username,
-          photoUrl: users.photoUrl,
-        })
-        .from(scores)
-        .innerJoin(users, eq(scores.userId, users.id))
-        .orderBy(desc(scores.score))
-        .limit(limit)
-    );
-
-    return results.map(leader => ({
-      ...leader,
-      firstName: leader.firstName || 'Anonymous',
-      lastName: leader.lastName || '',
-      username: leader.username || '',
-      photoUrl: leader.photoUrl || null,
-    }));
-  } catch (error) {
-    console.error('Error getting top scores:', error);
-    return [];
-  }
-}
-
 export async function getUserIdByTelegramId(telegramId: number) {
   noStore();
   
